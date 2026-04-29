@@ -29,8 +29,8 @@ A full-stack MERN application that helps users track daily expenses, visualize s
 ## 📁 Project Structure
 
 Expense Tracker/
-├── client/ # React frontend
-├── server/ # Node + Express backend
+├── client/ 
+├── server/ 
 ├── README.md
 
 ---
