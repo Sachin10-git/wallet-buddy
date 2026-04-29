@@ -30,7 +30,9 @@ A full-stack MERN application that helps users track daily expenses, visualize s
 
 Expense Tracker/
 ├── client/ 
+
 ├── server/ 
+
 ├── README.md
 
 ---
