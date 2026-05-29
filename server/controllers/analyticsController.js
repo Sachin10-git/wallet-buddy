@@ -181,7 +181,101 @@ exports.getDailyAnalytics = async (req, res) => {
   }
 };
 
+// 🆕 WEEKLY ANALYTICS
+exports.getWeeklyAnalytics = async (req, res) => {
+  try {
+    const userId = req.user._id;
 
+    const weekly = await Expense.aggregate([
+      {
+        $match: {
+          user: userId,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $isoWeekYear: "$createdAt" },
+            week: { $isoWeek: "$createdAt" },
+          },
+          total: {
+            $sum: "$amount",
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.week": 1,
+        },
+      },
+    ]);
+
+    const formatted = weekly.map((item) => ({
+      _id: `Week ${item._id.week}`,
+      total: item.total,
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
+// 🆕 MONTHLY TREND ANALYTICS
+exports.getMonthlyTrendAnalytics = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const monthly = await Expense.aggregate([
+      {
+        $match: {
+          user: userId,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: "$createdAt",
+            },
+            year: {
+              $year: "$createdAt",
+            },
+          },
+          total: {
+            $sum: "$amount",
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+        },
+      },
+    ]);
+
+    const monthNames = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec",
+    ];
+
+    const formatted = monthly.map((item) => ({
+      _id: `${monthNames[item._id.month - 1]} ${item._id.year}`,
+      total: item.total,
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 // 🆕 MONTHLY TOTAL (for card)
 exports.getMonthlyTotal = async (req, res) => {
