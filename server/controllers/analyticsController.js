@@ -100,7 +100,7 @@ exports.getSmartAnalytics = async (req, res) => {
       {
         $match: {
           user: userId,
-          createdAt: { $gte: startOfWeek }
+          expenseDate: { $gte: startOfWeek }
         }
       },
       {
@@ -120,8 +120,8 @@ exports.getSmartAnalytics = async (req, res) => {
       {
         $group: {
           _id: {
-            month: { $month: "$createdAt" },
-            year: { $year: "$createdAt" }
+            month: { $month: "$expenseDate" },
+            year: { $year: "$expenseDate" }
           },
           total: { $sum: "$amount" }
         }
@@ -164,7 +164,7 @@ exports.getDailyAnalytics = async (req, res) => {
           _id: {
             $dateToString: {
               format: "%d-%m-%Y",   // ✅ CHANGED HERE (DD-MM-YYYY)
-              date: "$createdAt"
+              date: "$expenseDate"
             }
           },
           total: { $sum: "$amount" }
@@ -287,8 +287,8 @@ exports.getMonthlyTotal = async (req, res) => {
       {
         $group: {
           _id: {
-            month: { $month: "$createdAt" },
-            year: { $year: "$createdAt" }
+            month: { $month: "$expenseDate" },
+            year: { $year: "$expenseDate" }
           },
           total: { $sum: "$amount" }
         }

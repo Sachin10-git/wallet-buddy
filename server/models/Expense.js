@@ -6,18 +6,28 @@ const expenseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
     amount: {
       type: Number,
       required: true,
     },
+
     category: {
       type: String,
       required: true,
     },
+
     description: String,
+
+    // 🆕 Actual date when expense occurred
+    expenseDate: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
   },
   {
-    timestamps: true, // ✅ ONLY USE THIS
+    timestamps: true,
   }
 );
 
