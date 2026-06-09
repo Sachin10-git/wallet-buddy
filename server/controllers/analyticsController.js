@@ -97,19 +97,29 @@ exports.getSmartAnalytics = async (req, res) => {
     startOfWeek.setHours(0, 0, 0, 0);
 
     const thisWeek = await Expense.aggregate([
-      {
-        $match: {
-          user: userId,
-          expenseDate: { $gte: startOfWeek }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$amount" }
-        }
+  {
+    $match: {
+      user: userId,
+      $expr: {
+        $gte: [
+          {
+            $ifNull: [
+              "$expenseDate",
+              "$createdAt"
+            ]
+          },
+          startOfWeek
+        ]
       }
-    ]);
+    }
+  },
+  {
+    $group: {
+      _id: null,
+      total: { $sum: "$amount" }
+    }
+  }
+]);
 
     const monthly = await Expense.aggregate([
       {
@@ -120,8 +130,16 @@ exports.getSmartAnalytics = async (req, res) => {
       {
         $group: {
           _id: {
-            month: { $month: "$expenseDate" },
-            year: { $year: "$expenseDate" }
+            month: {
+  $month: {
+    $ifNull: ["$expenseDate", "$createdAt"]
+  }
+},
+year: {
+  $year: {
+    $ifNull: ["$expenseDate", "$createdAt"]
+  }
+}
           },
           total: { $sum: "$amount" }
         }
@@ -164,7 +182,12 @@ exports.getDailyAnalytics = async (req, res) => {
           _id: {
             $dateToString: {
               format: "%d-%m-%Y",   // ✅ CHANGED HERE (DD-MM-YYYY)
-              date: "$expenseDate"
+              date: {
+          $ifNull: [
+            "$expenseDate",
+            "$createdAt"
+          ]
+        }
             }
           },
           total: { $sum: "$amount" }
@@ -240,11 +263,15 @@ exports.getMonthlyTrendAnalytics = async (req, res) => {
         $group: {
           _id: {
             month: {
-              $month: "$createdAt",
-            },
-            year: {
-              $year: "$createdAt",
-            },
+  $month: {
+    $ifNull: ["$expenseDate", "$createdAt"]
+  }
+},
+year: {
+  $year: {
+    $ifNull: ["$expenseDate", "$createdAt"]
+  }
+},
           },
           total: {
             $sum: "$amount",
@@ -287,8 +314,22 @@ exports.getMonthlyTotal = async (req, res) => {
       {
         $group: {
           _id: {
-            month: { $month: "$expenseDate" },
-            year: { $year: "$expenseDate" }
+            month: {
+  $month: {
+    $ifNull: [
+      "$expenseDate",
+      "$createdAt"
+    ]
+  }
+},
+year: {
+  $year: {
+    $ifNull: [
+      "$expenseDate",
+      "$createdAt"
+    ]
+  }
+}
           },
           total: { $sum: "$amount" }
         }
